@@ -9,8 +9,7 @@ router.get('/', (req, res) => {
         .then(posts => {
             res.status(200).json(posts)
         })
-        .catch(error => {
-            console.log(error)
+        .catch( () => {
             res.status(500).json({
                 message: "The posts information could not be retrieved"
             })
@@ -29,8 +28,7 @@ router.get('/:id', (req, res) => {
                 })
             }
         })
-        .catch(error => {
-            console.log(error)
+        .catch( () => {
             res.status(500).json({
                 message: "The post information could not be retrieved"
             })
@@ -51,12 +49,8 @@ router.post('/', (req, res) => {
                     .then(post => {
                         res.status(201).json(post)
                     })
-                    .catch(error => {
-                        console.log(error)
-                    })
             })
-            .catch(error => {
-                console.log(error)
+            .catch( () => {
                 res.status(500).json({
                     message: "There was an error while saving the post to the database"
                 })
@@ -83,12 +77,49 @@ router.put('/:id', async (req, res) => {
                         res.status(200).json(post)
                     })
             })
-            .catch(error => {
-                console.log(error)
+            .catch( () => {
                 res.status(500).json({ message: "The post information could not be modified" })
             })
         }
     }
+})
+
+// [DELETE] /api/posts/:id deletes a post
+
+router.delete('/:id', (req, res) => {
+    Posts.findById(req.params.id)
+        .then(possiblePost => {
+            if ( !possiblePost ) {
+                res.status(404).json({ message: "The post with the specified ID does not exist" })
+            } else {
+                Posts.remove(req.params.id)
+                    .then( () => {
+                    res.status(200).json(possiblePost)
+                })
+            }
+        })
+        .catch( () => {
+            res.status(500).json({ message: "The post could not be removed"})
+        })
+})
+
+// [GET] /api/posts/:id/comments get comments 
+
+router.get('/:id/comments' , (req, res) => {
+    Posts.findById(req.params.id)
+        .then(possiblePost => {
+            if ( !possiblePost ) {
+                res.status(404).json({ message: "The post with the specified ID does not exist"})
+            } else {
+                Posts.findPostComments(req.params.id)
+                    .then(comments => {
+                        res.status(200).json(comments)
+                    })
+            }
+        })
+        .catch( () => {
+            res.status(500).json({ message: "The comments information could not be retrieved" })
+        })
 })
 
 module.exports = router
